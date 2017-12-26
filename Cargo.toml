@@ -3,6 +3,15 @@ name          = "sctp"
 version       = "0.1.0"
 license       = "MIT"
 authors       = ["dangcheng <dangcheng@hotmail.com>"]
+description   = "sctp"
+documentation = "https://docs.rs/sctp"
+eywords       = ["sctp", "net"]
+exclude       = [
+  ".gitignore",
+  ".travis.yml",
+  "deploy.sh",
+  "test/**/*",
+]
 
 build         = "build.rs"
 
