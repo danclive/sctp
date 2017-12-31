@@ -47,7 +47,7 @@ impl SctpAddrType {
         };
     }
 
-    unsafe fn free(&self, ptr: *mut libc::sockaddr) {
+    unsafe fn free(&self, ptr: *mut libc::sockaddr) -> libc::c_int {
         return match *self {
             SctpAddrType::Local => sys::sctp_freeladdrs(ptr),
             SctpAddrType::Peer => sys::sctp_freepaddrs(ptr)
@@ -69,15 +69,25 @@ impl Socket {
     pub fn new_raw(fam: libc::c_int, ty: libc::c_int) -> io::Result<Socket> {
         unsafe{
             match cvt(libc::socket(fam, ty | libc::SOCK_CLOEXEC, sys::IPPROTO_SCTP)) {
-                Ok(fd) => return Ok(Socket(FileDesc::new(fd))),
-                Err(ref e) if e.raw_os_error() == Some(libc::EINVAL) => {},
+                Ok(fd) => {
+                    let fd = FileDesc::new(fd);
+                    let socket = Socket(fd);
+
+                    socket.default_event_subscribe()?;
+
+                    return Ok(socket)
+                }
+                Err(ref e) if e.raw_os_error() == Some(libc::EINVAL) => {}
                 Err(e) => return Err(e),
             }
 
-            let fd = cvt(libc::socket(fam, ty, 0))?;
+            let fd = cvt(libc::socket(fam, ty, sys::IPPROTO_SCTP))?;
             let fd = FileDesc::new(fd);
             fd.set_cloexec()?;
             let socket = Socket(fd);
+
+            socket.default_event_subscribe()?;
+
             Ok(socket)
         }
     }
@@ -246,7 +256,7 @@ impl Socket {
                 cmp::min(msg.len(), fd::max_len()),
                 &mut storage as *mut libc::sockaddr_storage as *mut libc::sockaddr,
                 &mut len,
-                &mut info,
+                &mut info as *mut sys::sctp_sndrcvinfo,
                 &mut flags
 
             )
@@ -257,7 +267,7 @@ impl Socket {
         Ok((ret as usize, info.sinfo_stream, addr))
     }
 
-    pub fn sendmsg(&self, msg: &[u8], addr: Option<SocketAddr>, stream: u16, ttl: libc::c_ulong) -> io::Result<usize> {
+    pub fn sendmsg(&self, msg: &[u8], addr: Option<SocketAddr>, stream: u16, ttl: u32) -> io::Result<usize> {
 
         let (addrp, len) = match addr {
             Some(addr) => addr.into_inner(),
@@ -386,6 +396,16 @@ impl Socket {
 
             Ok(val)
         }
+    }
+
+    pub fn default_event_subscribe(&self) -> io::Result<()> {
+        let mut subscribe: sys::sctp_event_subscribe = unsafe { mem::zeroed() };
+
+        subscribe.sctp_data_io_event = 1;
+
+        self.setsockopt(sys::IPPROTO_SCTP, sys::SCTP_EVENTS, subscribe)?;
+
+        Ok(())
     }
 }
 
