@@ -63,6 +63,6 @@ pub fn sockaddr_to_addr(storage: &libc::sockaddr_storage, len: usize) -> io::Res
     }
 }
 
-pub fn from_addr<A: ToSocketAddrs>(addr: A) -> io::Result<SocketAddr> {
+pub fn parse_addr<A: ToSocketAddrs>(addr: A) -> io::Result<SocketAddr> {
     addr.to_socket_addrs()?.next().ok_or(Error::new(ErrorKind::InvalidInput, "Address is not valid"))
 }

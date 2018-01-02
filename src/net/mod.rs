@@ -3,7 +3,7 @@ use std::io::{self, ErrorKind};
 pub mod fd;
 pub mod socket;
 pub mod addr;
-pub mod sctp;
+pub mod event;
 
 #[doc(hidden)]
 pub trait IsMinusOne {

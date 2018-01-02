@@ -640,7 +640,8 @@ extern "C" {
         context: u32
     ) -> libc::c_int;
 
-    pub fn sctp_send(sd: libc::c_int,
+    pub fn sctp_send(
+        sd: libc::c_int,
         msg : *const libc::c_void,
         len : usize,
         sinfo : * const sctp_sndrcvinfo,

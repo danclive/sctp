@@ -14,6 +14,7 @@ use net::{AsInner, FromInner, IntoInner};
 use net::fd::FileDesc;
 use net::addr::sockaddr_to_addr;
 use net::fd;
+use net::event::Event;
 
 use sys;
 
@@ -369,8 +370,15 @@ impl Socket {
     pub fn setsockopt<T>(&self, opt: libc::c_int, val: libc::c_int, payload: T) -> io::Result<()> {
         unsafe {
             let payload = &payload as *const T as *const libc::c_void;
-            cvt(libc::setsockopt(*self.as_inner(), opt, val, payload,
-                          mem::size_of::<T>() as libc::socklen_t))?;
+
+            cvt(libc::setsockopt(
+                *self.as_inner(),
+                opt,
+                val,
+                payload,
+                mem::size_of::<T>() as libc::socklen_t
+            ))?;
+
             Ok(())
         }
     }
@@ -379,9 +387,15 @@ impl Socket {
         unsafe {
             let mut slot: T = mem::zeroed();
             let mut len = mem::size_of::<T>() as libc::socklen_t;
-            cvt(libc::getsockopt(*self.as_inner(), opt, val,
-                              &mut slot as *mut _ as *mut _,
-                              &mut len))?;
+
+            cvt(libc::getsockopt(
+                *self.as_inner(),
+                opt,
+                val,
+                &mut slot as *mut T as *mut libc::c_void,
+                &mut len
+            ))?;
+
             assert_eq!(len as usize, mem::size_of::<T>());
             Ok(slot)
         }
@@ -402,6 +416,54 @@ impl Socket {
         let mut subscribe: sys::sctp_event_subscribe = unsafe { mem::zeroed() };
 
         subscribe.sctp_data_io_event = 1;
+
+        self.setsockopt(sys::IPPROTO_SCTP, sys::SCTP_EVENTS, subscribe)?;
+
+        Ok(())
+    }
+
+    pub fn event_subsctibe(&self, event: Event) -> io::Result<()> {
+        let mut subscribe: sys::sctp_event_subscribe = unsafe { mem::zeroed() };
+
+        if event.contains(Event::data_io()) {
+            subscribe.sctp_data_io_event = 1;
+        }
+
+        if event.contains(Event::association()) {
+            subscribe.sctp_association_event = 1;
+        }
+
+        if event.contains(Event::address()) {
+            subscribe.sctp_address_event = 1;
+        }
+
+        if event.contains(Event::send_failure()) {
+            subscribe.sctp_send_failure_event = 1;
+        }
+
+        if event.contains(Event::peer_error()) {
+            subscribe.sctp_peer_error_event = 1;
+        }
+
+        if event.contains(Event::shutdown()) {
+            subscribe.sctp_shutdown_event = 1;
+        }
+
+        if event.contains(Event::partial_delivery()) {
+            subscribe.sctp_partial_delivery_event = 1;
+        }
+
+        if event.contains(Event::adaptation_layer()) {
+            subscribe.sctp_adaptation_layer_event = 1;
+        }
+
+        if event.contains(Event::authentication()) {
+            subscribe.sctp_authentication_event = 1;
+        }
+
+        if event.contains(Event::sender_dry()) {
+            subscribe.sctp_sender_dry_event = 1;
+        }
 
         self.setsockopt(sys::IPPROTO_SCTP, sys::SCTP_EVENTS, subscribe)?;
 

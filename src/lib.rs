@@ -1,9 +1,11 @@
 extern crate libc;
 
-pub use net::sctp::SctpListener;
-pub use net::sctp::SctpStream;
-pub use net::sctp::SctpEndpoint;
+pub use sctp::SctpListener;
+pub use sctp::SctpStream;
+pub use sctp::SctpEndpoint;
+pub use net::event::Event;
 
 #[allow(dead_code)]
 pub mod sys;
 pub mod net;
+pub mod sctp;

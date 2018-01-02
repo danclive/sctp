@@ -9,8 +9,9 @@ use libc;
 use net::socket::Socket;
 use net::socket::BindOp;
 use net::addr::sockaddr_to_addr;
-use net::addr::from_addr;
+use net::addr::parse_addr;
 use net::AsInner;
+use net::event::Event;
 
 fn each_addr<A: ToSocketAddrs, F, T>(addr: A, mut f: F) -> io::Result<T>
     where F: FnMut(&SocketAddr) -> io::Result<T>
@@ -51,7 +52,7 @@ impl SctpStream {
         let mut family = libc::AF_INET;
 
         for addr in addrs {
-            let addr = from_addr(addr)?;
+            let addr = parse_addr(addr)?;
 
             if let SocketAddr::V6(..) = addr {
                 family = libc::AF_INET6;
@@ -147,6 +148,10 @@ impl SctpStream {
         self.0.shutdown()
     }
 
+    pub fn event_subsctibe(&self, event: Event) -> io::Result<()> {
+        self.0.event_subsctibe(event)
+    }
+
     pub fn try_clone(&self) -> io::Result<SctpStream> {
         Ok(SctpStream(self.0.duplicate()?))
     }
@@ -232,7 +237,7 @@ impl SctpListener {
         let mut family = libc::AF_INET;
 
         for addr in addrs {
-            let addr = from_addr(addr)?;
+            let addr = parse_addr(addr)?;
 
             if let SocketAddr::V6(..) = addr {
                 family = libc::AF_INET6;
@@ -279,6 +284,10 @@ impl SctpListener {
         self.0.set_nonblocking(nonblocking)
     }
 
+    pub fn event_subsctibe(&self, event: Event) -> io::Result<()> {
+        self.0.event_subsctibe(event)
+    }
+
     pub fn try_clone(&self) -> io::Result<SctpListener> {
         Ok(SctpListener(self.0.duplicate()?))
     }
@@ -316,7 +325,7 @@ impl SctpEndpoint {
         let mut family = libc::AF_INET;
 
         for addr in addrs {
-            let addr = from_addr(addr)?;
+            let addr = parse_addr(addr)?;
 
             if let SocketAddr::V6(..) = addr {
                 family = libc::AF_INET6;
@@ -341,7 +350,7 @@ impl SctpEndpoint {
     }
 
     pub fn send_to<A: ToSocketAddrs>(&self, msg: &[u8], addr: A, stream: u16) -> io:: Result<usize> {
-        let addr = from_addr(addr)?;
+        let addr = parse_addr(addr)?;
 
         self.0.sendmsg(msg, Some(addr), stream, 0)
     }
@@ -390,6 +399,10 @@ impl SctpEndpoint {
 
     pub fn write_timeout(&self) -> io::Result<Option<Duration>> {
         self.0.timeout(libc::SO_RCVTIMEO)
+    }
+
+    pub fn event_subsctibe(&self, event: Event) -> io::Result<()> {
+        self.0.event_subsctibe(event)
     }
 
     pub fn try_clone(&self) -> io::Result<SctpStream> {
