@@ -13,7 +13,7 @@ use libc;
 pub struct __IncompleteArrayField<T>(PhantomData<T>);
 impl<T> __IncompleteArrayField<T> {
     #[inline]
-    pub fn new () -> Self {
+    pub fn new() -> Self {
         __IncompleteArrayField(PhantomData)
     }
 
@@ -23,81 +23,35 @@ impl<T> __IncompleteArrayField<T> {
     }
 
     #[inline]
-    pub unsafe fn as_mut_ptr(&mut self) -> * mut T {
+    pub unsafe fn as_mut_ptr(&mut self) -> *mut T {
         transmute(self)
     }
 
     #[inline]
-    pub unsafe fn as_slice(&self , len : usize ) -> &[T] {
+    pub unsafe fn as_slice(&self, len: usize ) -> &[T] {
         slice::from_raw_parts( self.as_ptr(), len)
     }
 
     #[inline]
-    pub unsafe fn as_mut_slice(&mut self, len: usize) -> & mut [T] {
+    pub unsafe fn as_mut_slice(&mut self, len: usize) -> &mut [T] {
         slice::from_raw_parts_mut(self.as_mut_ptr(), len)
     }
 }
 
 impl<T> fmt::Debug for __IncompleteArrayField<T> {
-    fn fmt ( & self , fmt: &mut fmt :: Formatter ) -> fmt::Result {
+    fn fmt ( & self , fmt: &mut fmt::Formatter ) -> fmt::Result {
         fmt.write_str( "__IncompleteArrayField" )
     }
 }
 
-impl < T > Clone for __IncompleteArrayField<T> {
+impl <T> Clone for __IncompleteArrayField<T> {
     #[inline]
     fn clone(&self) -> Self {
         Self::new()
     }
 }
 
-impl < T > Copy for __IncompleteArrayField <T> {}
-
-#[repr(C)]
-pub struct __BindgenUnionField<T>(PhantomData<T>);
-
-impl<T> __BindgenUnionField<T>{
-    #[inline]
-    pub fn new() -> Self {
-        __BindgenUnionField(PhantomData)
-    }
-
-    #[inline]
-    pub unsafe fn as_ref ( & self ) -> &T {
-        transmute(self)
-    }
-
-    #[inline]
-    pub unsafe fn as_mut(&mut self) -> &mut T {
-        transmute(self)
-    }
-}
-
-impl <T> Default for __BindgenUnionField<T> {
-    #[inline]
-    fn default() -> Self {
-        Self::new ()
-    }
-}
-
-impl <T> Clone for __BindgenUnionField<T> {
-    #[inline]
-    fn clone(&self ) -> Self {
-        Self::new()
-    }
-}
-
-impl <T> Copy for __BindgenUnionField < T > {}
-
-impl <T> fmt::Debug for __BindgenUnionField < T > {
-    fn fmt (&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.write_str( "__BindgenUnionField")
-    }
-}
-
-impl <T> ::std::hash::Hash for __BindgenUnionField<T> { fn hash <H: ::std::hash::Hasher> (&self, _state: &mut H) {}}
-impl <T> ::std::cmp::PartialEq for __BindgenUnionField<T> { fn eq (&self, _other : & __BindgenUnionField <T>) -> bool { true }}
-impl <T> ::std::cmp::Eq for __BindgenUnionField<T> {}
+impl <T> Copy for __IncompleteArrayField <T> {}
 
 pub const SOL_SCTP: i32 = 132;
 pub const IPPROTO_SCTP: i32 = 132;
@@ -170,12 +124,15 @@ pub struct sctp_sndrcvinfo {
     pub sinfo_assoc_id : sctp_assoc_t
 }
 
-pub const sctp_sinfo_flags_SCTP_UNORDERED: sctp_sinfo_flags = 1;
-pub const sctp_sinfo_flags_SCTP_ADDR_OVER: sctp_sinfo_flags = 2;
-pub const sctp_sinfo_flags_SCTP_ABORT: sctp_sinfo_flags = 4;
-pub const sctp_sinfo_flags_SCTP_SACK_IMMEDIATELY: sctp_sinfo_flags = 8;
-pub const sctp_sinfo_flags_SCTP_EOF: sctp_sinfo_flags = 512;
-pub type sctp_sinfo_flags = u16;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_sinfo_flags {
+    SCTP_UNORDERED = 1,
+    SCTP_ADDR_OVER = 2,
+    SCTP_ABORT = 4,
+    SCTP_SACK_IMMEDIATELY = 8,
+    SCTP_EOF = 512
+}
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -185,13 +142,17 @@ pub union sctp_cmsg_data_t {
     pub sndrcv: sctp_sndrcvinfo,
 }
 
-pub const sctp_cmsg_type_SCTP_INIT : sctp_cmsg_type = 0;
-pub const sctp_cmsg_type_SCTP_SNDRCV : sctp_cmsg_type = 1;
-pub type sctp_cmsg_type = u32;
-pub use self::sctp_cmsg_type as sctp_cmsg_t;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_cmsg_type {
+    SCTP_INIT = 0,
+    SCTP_SNDRCV = 1
+}
+
+pub type sctp_cmsg_t = u32;
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_assoc_change {
     pub sac_type: u16,
     pub sac_flags: u16,
@@ -204,14 +165,18 @@ pub struct sctp_assoc_change {
     pub sac_info: __IncompleteArrayField<u8>
 }
 
-pub const sctp_sac_state_SCTP_COMM_UP : sctp_sac_state = 0;
-pub const sctp_sac_state_SCTP_COMM_LOST : sctp_sac_state = 1;
-pub const sctp_sac_state_SCTP_RESTART : sctp_sac_state = 2;
-pub const sctp_sac_state_SCTP_SHUTDOWN_COMP : sctp_sac_state = 3;
-pub const sctp_sac_state_SCTP_CANT_STR_ASSOC : sctp_sac_state = 4;
-pub type sctp_sac_state = u32;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_sac_state {
+    SCTP_COMM_UP = 0,
+    SCTP_COMM_LOST = 1,
+    SCTP_RESTART = 2,
+    SCTP_SHUTDOWN_COMP = 3,
+    SCTP_CANT_STR_ASSOC = 4
+}
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct sctp_paddr_change {
     pub spc_type: u16,
     pub spc_flags: u16,
@@ -222,16 +187,19 @@ pub struct sctp_paddr_change {
     pub spc_assoc_id: sctp_assoc_t
 }
 
-pub const sctp_spc_state_SCTP_ADDR_AVAILABLE: sctp_spc_state = 0;
-pub const sctp_spc_state_SCTP_ADDR_UNREACHABLE: sctp_spc_state = 1;
-pub const sctp_spc_state_SCTP_ADDR_REMOVED: sctp_spc_state = 2;
-pub const sctp_spc_state_SCTP_ADDR_ADDED: sctp_spc_state = 3;
-pub const sctp_spc_state_SCTP_ADDR_MADE_PRIM: sctp_spc_state = 4;
-pub const sctp_spc_state_SCTP_ADDR_CONFIRMED: sctp_spc_state = 5;
-pub type sctp_spc_state = u32;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_spc_state {
+    SCTP_ADDR_AVAILABLE = 0,
+    SCTP_ADDR_UNREACHABLE = 1,
+    SCTP_ADDR_REMOVED = 2,
+    SCTP_ADDR_ADDED = 3,
+    SCTP_ADDR_MADE_PRIM = 4,
+    SCTP_ADDR_CONFIRMED = 5
+}
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_remote_error {
     pub sre_type: u16,
     pub sre_flags: u16,
@@ -242,7 +210,7 @@ pub struct sctp_remote_error {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_send_failed {
     pub ssf_type: u16,
     pub ssf_flags: u16,
@@ -253,13 +221,15 @@ pub struct sctp_send_failed {
     pub ssf_data : __IncompleteArrayField<u8>
 }
 
-pub const sctp_ssf_flags_SCTP_DATA_UNSENT : sctp_ssf_flags = 0;
-pub const sctp_ssf_flags_SCTP_DATA_SENT : sctp_ssf_flags = 1;
-pub type sctp_ssf_flags = u16;
-
-
 #[repr(C)]
 #[derive(Debug, Clone)]
+pub enum sctp_ssf_flags {
+    SCTP_DATA_UNSENT = 0,
+    SCTP_DATA_SENT = 1,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_shutdown_event {
     pub sse_type: u16,
     pub sse_flags: u16,
@@ -268,7 +238,7 @@ pub struct sctp_shutdown_event {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_adaptation_event {
     pub sai_type: u16,
     pub sai_flags: u16,
@@ -278,7 +248,7 @@ pub struct sctp_adaptation_event {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_pdapi_event {
     pub pdapi_type: u16,
     pub pdapi_flags: u16,
@@ -290,7 +260,7 @@ pub struct sctp_pdapi_event {
 pub const SCTP_PARTIAL_DELIVERY_ABORTED: u32 = 0;
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_authkey_event {
     pub auth_type: u16,
     pub auth_flags: u16,
@@ -304,7 +274,7 @@ pub struct sctp_authkey_event {
 pub const SCTP_AUTH_NEWKEY: u32 = 0;
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_sender_dry_event {
     pub sender_dry_type: u16,
     pub sender_dry_flags: u16,
@@ -328,49 +298,53 @@ pub struct sctp_event_subscribe {
 }
 
 #[repr(C)]
-#[derive(Clone)]
-pub struct sctp_notification {
-    pub sn_header: __BindgenUnionField <sctp_notification_header>,
-    pub sn_assoc_change: __BindgenUnionField<sctp_assoc_change>,
-    pub sn_paddr_change: __BindgenUnionField<sctp_paddr_change>,
-    pub sn_remote_error: __BindgenUnionField<sctp_remote_error>,
-    pub sn_send_failed: __BindgenUnionField<sctp_send_failed>,
-    pub sn_shutdown_event: __BindgenUnionField<sctp_shutdown_event>,
-    pub sn_adaptation_event: __BindgenUnionField<sctp_adaptation_event>,
-    pub sn_pdapi_event: __BindgenUnionField<sctp_pdapi_event>,
-    pub sn_authkey_event: __BindgenUnionField<sctp_authkey_event>,
-    pub sn_sender_dry_event: __BindgenUnionField<sctp_sender_dry_event>,
-    pub bindgen_union_field: [u32; 37usize]
+pub union sctp_notification {
+    pub sn_header: sctp_notification_header,
+    pub sn_assoc_change: sctp_assoc_change,
+    pub sn_paddr_change: sctp_paddr_change,
+    pub sn_remote_error: sctp_remote_error,
+    pub sn_send_failed: sctp_send_failed,
+    pub sn_shutdown_event: sctp_shutdown_event,
+    pub sn_adaptation_event: sctp_adaptation_event,
+    pub sn_pdapi_event: sctp_pdapi_event,
+    pub sn_authkey_event: sctp_authkey_event,
+    pub sn_sender_dry_event: sctp_sender_dry_event
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct sctp_notification_header {
     pub sn_type: u16,
     pub sn_flags: u16,
     pub sn_length : u32
 }
 
-pub const sctp_sn_type_SCTP_SN_TYPE_BASE: sctp_sn_type = 32768;
-pub const sctp_sn_type_SCTP_ASSOC_CHANGE: sctp_sn_type = 32769;
-pub const sctp_sn_type_SCTP_PEER_ADDR_CHANGE: sctp_sn_type = 32770;
-pub const sctp_sn_type_SCTP_SEND_FAILED: sctp_sn_type = 32771;
-pub const sctp_sn_type_SCTP_REMOTE_ERROR: sctp_sn_type = 32772;
-pub const sctp_sn_type_SCTP_SHUTDOWN_EVENT: sctp_sn_type = 32773;
-pub const sctp_sn_type_SCTP_PARTIAL_DELIVERY_EVENT: sctp_sn_type = 32774;
-pub const sctp_sn_type_SCTP_ADAPTATION_INDICATION: sctp_sn_type = 32775;
-pub const sctp_sn_type_SCTP_AUTHENTICATION_INDICATION: sctp_sn_type = 32776;
-pub const sctp_sn_type_SCTP_SENDER_DRY_EVENT: sctp_sn_type = 32777;
-pub type sctp_sn_type = u16;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_sn_type {
+    SCTP_SN_TYPE_BASE = 32768,
+    SCTP_ASSOC_CHANGE = 32769,
+    SCTP_PEER_ADDR_CHANGE = 32770,
+    SCTP_SEND_FAILED = 32771,
+    SCTP_REMOTE_ERROR = 32772,
+    SCTP_SHUTDOWN_EVENT = 32773,
+    SCTP_PARTIAL_DELIVERY_EVENT = 32774,
+    SCTP_ADAPTATION_INDICATION = 32775,
+    SCTP_AUTHENTICATION_INDICATION = 32776,
+    SCTP_SENDER_DRY_EVENT = 32777
+}
 
-pub const sctp_sn_error_SCTP_FAILED_THRESHOLD: sctp_sn_error = 0;
-pub const sctp_sn_error_SCTP_RECEIVED_SACK: sctp_sn_error = 1;
-pub const sctp_sn_error_SCTP_HEARTBEAT_SUCCESS: sctp_sn_error = 2;
-pub const sctp_sn_error_SCTP_RESPONSE_TO_USER_REQ: sctp_sn_error = 3;
-pub const sctp_sn_error_SCTP_INTERNAL_ERROR: sctp_sn_error = 4;
-pub const sctp_sn_error_SCTP_SHUTDOWN_GUARD_EXPIRES: sctp_sn_error = 5;
-pub const sctp_sn_error_SCTP_PEER_FAULTY: sctp_sn_error = 6;
-pub type sctp_sn_error = u32;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_sn_error {
+    SCTP_FAILED_THRESHOLD = 0,
+    SCTP_RECEIVED_SACK = 1,
+    SCTP_HEARTBEAT_SUCCESS = 2,
+    SCTP_RESPONSE_TO_USER_REQ = 3,
+    SCTP_INTERNAL_ERROR = 4,
+    SCTP_SHUTDOWN_GUARD_EXPIRES = 5,
+    SCTP_PEER_FAULTY = 6
+}
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -410,18 +384,21 @@ pub struct sctp_setadaptation {
     pub ssb_adaptation_ind : u32
 }
 
-pub const sctp_spp_flags_SPP_HB_ENABLE: sctp_spp_flags = 1;
-pub const sctp_spp_flags_SPP_HB_DISABLE: sctp_spp_flags = 2;
-pub const sctp_spp_flags_SPP_HB: sctp_spp_flags = 3;
-pub const sctp_spp_flags_SPP_HB_DEMAND: sctp_spp_flags = 4;
-pub const sctp_spp_flags_SPP_PMTUD_ENABLE: sctp_spp_flags = 8;
-pub const sctp_spp_flags_SPP_PMTUD_DISABLE: sctp_spp_flags = 16;
-pub const sctp_spp_flags_SPP_PMTUD: sctp_spp_flags = 24;
-pub const sctp_spp_flags_SPP_SACKDELAY_ENABLE: sctp_spp_flags = 32;
-pub const sctp_spp_flags_SPP_SACKDELAY_DISABLE: sctp_spp_flags = 64;
-pub const sctp_spp_flags_SPP_SACKDELAY: sctp_spp_flags = 96;
-pub const sctp_spp_flags_SPP_HB_TIME_IS_ZERO: sctp_spp_flags = 128;
-pub type sctp_spp_flags = u32;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_spp_flags {
+    SPP_HB_ENABLE = 1<<0,       /*Enable heartbeats*/
+    SPP_HB_DISABLE = 1<<1,      /*Disable heartbeats*/
+    SPP_HB = 1<<0 | 1<<1,
+    SPP_HB_DEMAND = 1<<2,       /*Send heartbeat immediately*/
+    SPP_PMTUD_ENABLE = 1<<3,    /*Enable PMTU discovery*/
+    SPP_PMTUD_DISABLE = 1<<4,   /*Disable PMTU discovery*/
+    SPP_PMTUD = 1<<3 | 1<<4,
+    SPP_SACKDELAY_ENABLE = 1<<5,    /*Enable SACK*/
+    SPP_SACKDELAY_DISABLE = 1<<6,   /*Disable SACK*/
+    SPP_SACKDELAY = 1<<5 | 1<<6,
+    SPP_HB_TIME_IS_ZERO = 1<<7, /* Set HB delay to 0 */
+}
 
 #[repr(C)]
 pub struct sctp_paddrparams {
@@ -492,12 +469,15 @@ pub struct sctp_paddrinfo {
     pub spinfo_mtu: u32
 }
 
-pub const sctp_spinfo_state_SCTP_INACTIVE : sctp_spinfo_state = 0;
-pub const sctp_spinfo_state_SCTP_PF : sctp_spinfo_state = 1;
-pub const sctp_spinfo_state_SCTP_ACTIVE : sctp_spinfo_state = 2;
-pub const sctp_spinfo_state_SCTP_UNCONFIRMED : sctp_spinfo_state = 3;
-pub const sctp_spinfo_state_SCTP_UNKNOWN : sctp_spinfo_state = 65535;
-pub type sctp_spinfo_state = u32;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_spinfo_state {
+    SCTP_INACTIVE = 0,
+    SCTP_PF =  1,
+    SCTP_ACTIVE = 2,
+    SCTP_UNCONFIRMED = 3,
+    SCTP_UNKNOWN = 0xffff
+}
 
 #[repr(C)]
 pub struct sctp_status {
@@ -520,18 +500,22 @@ pub struct sctp_authchunks {
     pub gauth_chunks: __IncompleteArrayField <u8>
 }
 
-pub const sctp_sstat_state_SCTP_EMPTY: sctp_sstat_state = 0;
-pub const sctp_sstat_state_SCTP_CLOSED: sctp_sstat_state = 1;
-pub const sctp_sstat_state_SCTP_COOKIE_WAIT: sctp_sstat_state = 2;
-pub const sctp_sstat_state_SCTP_COOKIE_ECHOED: sctp_sstat_state = 3;
-pub const sctp_sstat_state_SCTP_ESTABLISHED: sctp_sstat_state = 4;
-pub const sctp_sstat_state_SCTP_SHUTDOWN_PENDING: sctp_sstat_state = 5;
-pub const sctp_sstat_state_SCTP_SHUTDOWN_SENT: sctp_sstat_state = 6;
-pub const sctp_sstat_state_SCTP_SHUTDOWN_RECEIVED: sctp_sstat_state = 7;
-pub const sctp_sstat_state_SCTP_SHUTDOWN_ACK_SENT: sctp_sstat_state = 8;
-pub type sctp_sstat_state = u32;
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum sctp_sstat_state {
+    SCTP_EMPTY = 0,
+    SCTP_CLOSED = 1,
+    SCTP_COOKIE_WAIT = 2,
+    SCTP_COOKIE_ECHOED = 3,
+    SCTP_ESTABLISHED = 4,
+    SCTP_SHUTDOWN_PENDING = 5,
+    SCTP_SHUTDOWN_SENT = 6,
+    SCTP_SHUTDOWN_RECEIVED = 7,
+    SCTP_SHUTDOWN_ACK_SENT = 8
+}
 
-#[repr(C)]#[derive(Debug, Clone)]
+#[repr(C)]
+#[derive(Debug, Clone)]
 pub struct sctp_getaddrs_old {
     pub assoc_id : sctp_assoc_t,
     pub addr_num: libc::c_int,
@@ -568,8 +552,7 @@ pub struct sctp_assoc_stats {
     pub sas_ictrlchunks: u64
 }
 
-pub const sctp_msg_flags_MSG_NOTIFICATION : sctp_msg_flags = 32768;
-pub type sctp_msg_flags = u16;
+pub const sctp_msg_flags_MSG_NOTIFICATION: u16 = 0x8000;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
