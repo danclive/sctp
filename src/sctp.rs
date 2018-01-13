@@ -3,6 +3,7 @@ use std::io::{self, Error, ErrorKind, Read, Write};
 use std::mem;
 use std::time::Duration;
 use std::fmt;
+use std::os::unix::io::{AsRawFd, RawFd, FromRawFd};
 
 use libc;
 
@@ -12,6 +13,7 @@ use net::addr::sockaddr_to_addr;
 use net::addr::parse_addr;
 use net::AsInner;
 use net::event::Event;
+use net::notification::Notification;
 
 fn each_addr<A: ToSocketAddrs, F, T>(addr: A, mut f: F) -> io::Result<T>
     where F: FnMut(&SocketAddr) -> io::Result<T>
@@ -72,9 +74,9 @@ impl SctpStream {
         self.0.sendmsg(msg, None, stream, 0)
     }
 
-    pub fn recvmsg(&self, msg: &mut [u8]) -> io::Result<(usize, u16)> {
-        let (size, stream, _) = self.0.recvmsg(msg)?;
-        return Ok((size, stream))
+    pub fn recvmsg(&self, msg: &mut [u8]) -> io::Result<(usize, u16, Option<Notification>)> {
+        let (size, stream, _, notification) = self.0.recvmsg(msg)?;
+        return Ok((size, stream, notification))
     }
 
     pub fn local_addrs(&self) -> io::Result<Vec<SocketAddr>> {
@@ -209,6 +211,19 @@ impl fmt::Debug for SctpStream {
     }
 }
 
+impl AsRawFd for SctpStream {
+    fn as_raw_fd(&self) -> RawFd {
+        self.0.as_raw_fd()
+    }
+}
+
+impl FromRawFd for SctpStream {
+    unsafe fn from_raw_fd(fd: RawFd) -> SctpStream {
+        let sock = Socket::from_raw_fd(fd);
+        SctpStream(sock)
+    }
+}
+
 pub struct SctpListener(Socket);
 
 impl SctpListener {
@@ -297,6 +312,19 @@ impl SctpListener {
     }
 }
 
+impl AsRawFd for SctpListener {
+    fn as_raw_fd(&self) -> RawFd {
+        self.0.as_raw_fd()
+    }
+}
+
+impl FromRawFd for SctpListener {
+    unsafe fn from_raw_fd(fd: RawFd) -> SctpListener {
+        let sock = Socket::from_raw_fd(fd);
+        SctpListener(sock)
+    }
+}
+
 pub struct SctpEndpoint(Socket);
 
 impl SctpEndpoint {
@@ -345,7 +373,15 @@ impl SctpEndpoint {
         Ok(SctpEndpoint(sock))
     }
 
-    pub fn revc_from(&self, msg: &mut [u8]) -> io::Result<(usize, u16, SocketAddr)> {
+    // pub fn new() -> io::Result<SctpEndpoint> {
+    //     let sock = Socket::new_raw(family, libc::SOCK_SEQPACKET)?;
+
+    //     sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
+
+    //     Ok(SctpEndpoint(sock))
+    // }
+
+    pub fn revc_from(&self, msg: &mut [u8]) -> io::Result<(usize, u16, Option<SocketAddr>, Option<Notification>)> {
         self.0.recvmsg(msg)
     }
 
@@ -411,5 +447,18 @@ impl SctpEndpoint {
 
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
         self.0.take_error()
+    }
+}
+
+impl AsRawFd for SctpEndpoint {
+    fn as_raw_fd(&self) -> RawFd {
+        self.0.as_raw_fd()
+    }
+}
+
+impl FromRawFd for SctpEndpoint {
+    unsafe fn from_raw_fd(fd: RawFd) -> SctpEndpoint {
+        let sock = Socket::from_raw_fd(fd);
+        SctpEndpoint(sock)
     }
 }

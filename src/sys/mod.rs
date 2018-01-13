@@ -552,7 +552,7 @@ pub struct sctp_assoc_stats {
     pub sas_ictrlchunks: u64
 }
 
-pub const sctp_msg_flags_MSG_NOTIFICATION: u16 = 0x8000;
+pub const MSG_NOTIFICATION: i32 = 0x8000;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -616,29 +616,29 @@ extern "C" {
         len: usize,
         to: *const libc::sockaddr,
         tolen: libc::socklen_t,
-        ppid: u32,
-        flags: u32,
-        stream_no: u16,
-        timetolive: u32,
-        context: u32
+        ppid: libc::uint32_t,
+        flags: libc::uint32_t,
+        stream_no: libc::uint16_t,
+        timetolive: libc::uint32_t,
+        context: libc::uint32_t
     ) -> libc::c_int;
 
     pub fn sctp_send(
         sd: libc::c_int,
         msg : *const libc::c_void,
-        len : usize,
+        len : libc::size_t,
         sinfo : * const sctp_sndrcvinfo,
         flags: libc::c_int
     ) -> libc::c_int;
 
     pub fn sctp_recvmsg(
         sd: libc::c_int,
-         msg : * mut libc::c_void,
-         len : usize,
-         from : * mut libc::sockaddr,
-         fromlen : * mut libc::socklen_t,
-         sinfo : * mut sctp_sndrcvinfo,
-         msg_flags : * mut libc::c_int
+        msg : *mut libc::c_void,
+        len : libc::size_t,
+        from : *mut libc::sockaddr,
+        fromlen : *mut libc::socklen_t,
+        sinfo : *mut sctp_sndrcvinfo,
+        msg_flags : *mut libc::c_int
     ) -> libc::c_int;
 
     pub fn sctp_getaddrlen(family: libc::sa_family_t) -> libc::c_int;

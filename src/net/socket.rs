@@ -15,6 +15,7 @@ use net::fd::FileDesc;
 use net::addr::sockaddr_to_addr;
 use net::fd;
 use net::event::Event;
+use net::notification::{notification_parse, Notification};
 
 use sys;
 
@@ -243,7 +244,7 @@ impl Socket {
         self.0.write(buf)
     }
 
-    pub fn recvmsg(&self, msg: &mut [u8]) -> io::Result<(usize, u16, SocketAddr)> {
+    pub fn recvmsg(&self, msg: &mut [u8]) -> io::Result<(usize, u16, Option<SocketAddr>, Option<Notification>)> {
         let mut storage: libc::sockaddr_storage = unsafe { mem::zeroed() };
         let mut len = mem::size_of_val(&storage) as libc::socklen_t;
 
@@ -259,13 +260,22 @@ impl Socket {
                 &mut len,
                 &mut info as *mut sys::sctp_sndrcvinfo,
                 &mut flags
-
             )
         })?;
 
-        let addr = sockaddr_to_addr(&storage, len as usize)?;
+        let notification = if flags & sys::MSG_NOTIFICATION == sys::MSG_NOTIFICATION {
+            let buf: &[u8] = &msg[0..(ret as usize)];
+            notification_parse(buf)?
+        } else {
+            None
+        };
 
-        Ok((ret as usize, info.sinfo_stream, addr))
+        let addr = match sockaddr_to_addr(&storage, len as usize) {
+            Ok(addr) => Some(addr),
+            Err(_) => None
+        };
+
+        Ok((ret as usize, info.sinfo_stream, addr, notification))
     }
 
     pub fn sendmsg(&self, msg: &[u8], addr: Option<SocketAddr>, stream: u16, ttl: u32) -> io::Result<usize> {
@@ -347,8 +357,6 @@ impl Socket {
     }
 
     pub fn nodelay(&self) -> io::Result<bool> {
-        // let raw: c_int = self.getsockopt(sys::SOL_SCTP, sys::SCTP_NODELAY)?;
-        // Ok(raw != 0)
         let raw: libc::c_int = self.sctp_opt_info(sys::SCTP_NODELAY, 0)?;
         Ok(raw != 0)
     }
@@ -464,6 +472,8 @@ impl Socket {
         if event.contains(Event::sender_dry()) {
             subscribe.sctp_sender_dry_event = 1;
         }
+
+        println!("{:?}", subscribe);
 
         self.setsockopt(sys::IPPROTO_SCTP, sys::SCTP_EVENTS, subscribe)?;
 

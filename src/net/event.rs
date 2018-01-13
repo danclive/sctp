@@ -11,7 +11,7 @@ const ADAPTATION_LAYER: usize   = 0b0010000000;
 const AUTHENTICATION: usize     = 0b0100000000;
 const SENDER_DRY: usize         = 0b1000000000;
 
-#[derive(Copy, PartialEq, Eq, Clone, PartialOrd, Ord)]
+#[derive(Debug, Copy, PartialEq, Eq, Clone, PartialOrd, Ord)]
 pub struct Event(usize);
 
 impl Event {

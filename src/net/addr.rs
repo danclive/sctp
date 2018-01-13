@@ -58,7 +58,7 @@ pub fn sockaddr_to_addr(storage: &libc::sockaddr_storage, len: usize) -> io::Res
             })))
         }
         _ => {
-            Err(Error::new(ErrorKind::InvalidInput, "invalid argument"))
+            Err(Error::new(ErrorKind::Other, "Cannot retrieve addresses"))
         }
     }
 }
