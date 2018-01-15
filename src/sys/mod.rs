@@ -627,7 +627,7 @@ extern "C" {
         sd: libc::c_int,
         msg : *const libc::c_void,
         len : libc::size_t,
-        sinfo : * const sctp_sndrcvinfo,
+        sinfo : *const sctp_sndrcvinfo,
         flags: libc::c_int
     ) -> libc::c_int;
 

@@ -15,34 +15,17 @@ use net::AsInner;
 use net::event::Event;
 use net::notification::Notification;
 
-fn each_addr<A: ToSocketAddrs, F, T>(addr: A, mut f: F) -> io::Result<T>
-    where F: FnMut(&SocketAddr) -> io::Result<T>
-{
-    let mut last_err = None;
-    for addr in addr.to_socket_addrs()? {
-        match f(&addr) {
-            Ok(l) => return Ok(l),
-            Err(e) => last_err = Some(e),
-        }
-    }
-    Err(last_err.unwrap_or_else(|| {
-        Error::new(ErrorKind::InvalidInput, "could not resolve to any addresses")
-    }))
-}
-
 pub struct SctpStream(Socket);
 
 impl SctpStream {
     pub fn connect<A: ToSocketAddrs>(addr: A) -> io::Result<SctpStream> {
-        let f = |addr: &SocketAddr| {
-            let sock = Socket::new(addr, libc::SOCK_STREAM)?;
+        let addr = parse_addr(addr)?;
 
-            sock.connect(addr)?;
-            
-            Ok(sock)
-        };
+        let sock = Socket::new(&addr, libc::SOCK_STREAM)?;
 
-        each_addr(addr, f).map(SctpStream)
+        sock.connect(&addr)?;
+
+        Ok(SctpStream(sock))
     }
 
     pub fn connectx<A: ToSocketAddrs>(addrs: &[A]) -> io::Result<SctpStream>{
@@ -228,19 +211,17 @@ pub struct SctpListener(Socket);
 
 impl SctpListener {
     pub fn bind<A: ToSocketAddrs>(addr: A) -> io::Result<SctpListener> {
-        let f = |addr: &SocketAddr| {
-            let sock = Socket::new(addr, libc::SOCK_STREAM)?;
+        let addr = parse_addr(addr)?;
 
-            sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
+        let sock = Socket::new(&addr, libc::SOCK_STREAM)?;
 
-            sock.bind(addr)?;
+        sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
 
-            sock.listen(128)?;
+        sock.bind(&addr)?;
 
-            Ok(sock)
-        };
+        sock.listen(128)?;
 
-        each_addr(addr, f).map(SctpListener)
+        Ok(SctpListener(sock))
     }
 
     pub fn bindx<A: ToSocketAddrs>(addrs: &[A]) -> io::Result<SctpListener> {
@@ -329,19 +310,17 @@ pub struct SctpEndpoint(Socket);
 
 impl SctpEndpoint {
     pub fn bind<A: ToSocketAddrs>(addr: A) -> io::Result<SctpEndpoint> {
-        let f = |addr: &SocketAddr| {
-            let sock = Socket::new(addr, libc::SOCK_SEQPACKET)?;
+        let addr = parse_addr(addr)?;
 
-            sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
+        let sock = Socket::new(&addr, libc::SOCK_SEQPACKET)?;
 
-            sock.bind(addr)?;
+        sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
 
-            sock.listen(128)?;
+        sock.bind(&addr)?;
 
-            Ok(sock)
-        };
+        sock.listen(128)?;
 
-        each_addr(addr, f).map(SctpEndpoint)
+        Ok(SctpEndpoint(sock))
     }
 
     pub fn bindx<A: ToSocketAddrs>(addrs: &[A]) -> io::Result<SctpEndpoint> {
@@ -373,13 +352,21 @@ impl SctpEndpoint {
         Ok(SctpEndpoint(sock))
     }
 
-    // pub fn new() -> io::Result<SctpEndpoint> {
-    //     let sock = Socket::new_raw(family, libc::SOCK_SEQPACKET)?;
+    pub fn new() -> io::Result<SctpEndpoint> {
+        let sock = Socket::new_raw(libc::AF_INET6, libc::SOCK_SEQPACKET)?;
 
-    //     sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
+        sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
 
-    //     Ok(SctpEndpoint(sock))
-    // }
+        Ok(SctpEndpoint(sock))
+    }
+
+    pub fn new_v4() -> io::Result<SctpEndpoint> {
+        let sock = Socket::new_raw(libc::AF_INET, libc::SOCK_SEQPACKET)?;
+
+        sock.setsockopt(libc::SOL_SOCKET, libc::SO_REUSEADDR, 1 as libc::c_int)?;
+
+        Ok(SctpEndpoint(sock))
+    }
 
     pub fn revc_from(&self, msg: &mut [u8]) -> io::Result<(usize, u16, Option<SocketAddr>, Option<Notification>)> {
         self.0.recvmsg(msg)
