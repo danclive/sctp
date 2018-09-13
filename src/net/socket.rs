@@ -189,21 +189,19 @@ impl Socket {
         let mut offset = 0;
 
         for _ in 0..len {
-            unsafe {
-                let scokaddr = addrs.offset(offset) as *const libc::sockaddr;
+            let scokaddr = unsafe { addrs.offset(offset) } as *const libc::sockaddr;
 
-                let len = match (*scokaddr).sa_family as i32 {
-                    libc::AF_INET => mem::size_of::<libc::sockaddr_in>(),
-                    libc::AF_INET6 => mem::size_of::<libc::sockaddr_in6>(),
-                    family => {
-                        what.free(addrs as *mut libc::sockaddr);
-                        return Err(Error::new(ErrorKind::Other, format!("Unsupported address family : {}", family)))
-                    }
-                } as libc::socklen_t;
+            let len = match unsafe { (*scokaddr).sa_family } as i32 {
+                libc::AF_INET => mem::size_of::<libc::sockaddr_in>(),
+                libc::AF_INET6 => mem::size_of::<libc::sockaddr_in6>(),
+                family => {
+                    unsafe { what.free(addrs as *mut libc::sockaddr) };
+                    return Err(Error::new(ErrorKind::Other, format!("Unsupported address family : {}", family)))
+                }
+            } as libc::socklen_t;
 
-                addrs2.push(sockaddr_to_addr(&*(scokaddr as *const libc::sockaddr_storage), len as usize)?);
-                offset += len as isize;
-            }
+            addrs2.push(sockaddr_to_addr(unsafe { &*(scokaddr as *const libc::sockaddr_storage) }, len as usize)?);
+            offset += len as isize;
         }
 
         unsafe { what.free(addrs as *mut libc::sockaddr) };
@@ -472,8 +470,6 @@ impl Socket {
         if event.contains(Event::sender_dry()) {
             subscribe.sctp_sender_dry_event = 1;
         }
-
-        println!("{:?}", subscribe);
 
         self.setsockopt(sys::IPPROTO_SCTP, sys::SCTP_EVENTS, subscribe)?;
 

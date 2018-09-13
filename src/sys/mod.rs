@@ -39,7 +39,7 @@ impl<T> __IncompleteArrayField<T> {
 }
 
 impl<T> fmt::Debug for __IncompleteArrayField<T> {
-    fn fmt ( & self , fmt: &mut fmt::Formatter ) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.write_str( "__IncompleteArrayField" )
     }
 }
@@ -161,7 +161,7 @@ pub struct sctp_assoc_change {
     pub sac_error: u16,
     pub sac_outbound_streams: u16,
     pub sac_inbound_streams: u16,
-    pub sac_assoc_id : sctp_assoc_t,
+    pub sac_assoc_id: sctp_assoc_t,
     pub sac_info: __IncompleteArrayField<u8>
 }
 
@@ -205,7 +205,7 @@ pub struct sctp_remote_error {
     pub sre_flags: u16,
     pub sre_length: u32,
     pub sre_error: u16,
-    pub sre_assoc_id : sctp_assoc_t ,
+    pub sre_assoc_id: sctp_assoc_t ,
     pub sre_data: __IncompleteArrayField<u8>
 }
 
@@ -216,9 +216,9 @@ pub struct sctp_send_failed {
     pub ssf_flags: u16,
     pub ssf_length: u32,
     pub ssf_error: u32,
-    pub ssf_info : sctp_sndrcvinfo,
-    pub ssf_assoc_id : sctp_assoc_t,
-    pub ssf_data : __IncompleteArrayField<u8>
+    pub ssf_info: sctp_sndrcvinfo,
+    pub ssf_assoc_id: sctp_assoc_t,
+    pub ssf_data: __IncompleteArrayField<u8>
 }
 
 #[repr(C)]
@@ -234,7 +234,7 @@ pub struct sctp_shutdown_event {
     pub sse_type: u16,
     pub sse_flags: u16,
     pub sse_length: u32,
-    pub sse_assoc_id : sctp_assoc_t
+    pub sse_assoc_id: sctp_assoc_t
 }
 
 #[repr(C)]
@@ -244,7 +244,7 @@ pub struct sctp_adaptation_event {
     pub sai_flags: u16,
     pub sai_length: u32,
     pub sai_adaptation_ind: u32,
-    pub sai_assoc_id : sctp_assoc_t
+    pub sai_assoc_id: sctp_assoc_t
 }
 
 #[repr(C)]
@@ -254,7 +254,7 @@ pub struct sctp_pdapi_event {
     pub pdapi_flags: u16,
     pub pdapi_length: u32,
     pub pdapi_indication: u32,
-    pub pdapi_assoc_id : sctp_assoc_t
+    pub pdapi_assoc_id: sctp_assoc_t
 }
 
 pub const SCTP_PARTIAL_DELIVERY_ABORTED: u32 = 0;
@@ -268,7 +268,7 @@ pub struct sctp_authkey_event {
     pub auth_keynumber: u16,
     pub auth_altkeynumber: u16,
     pub auth_indication: u32,
-    pub auth_assoc_id : sctp_assoc_t
+    pub auth_assoc_id: sctp_assoc_t
 }
 
 pub const SCTP_AUTH_NEWKEY: u32 = 0;
@@ -279,22 +279,22 @@ pub struct sctp_sender_dry_event {
     pub sender_dry_type: u16,
     pub sender_dry_flags: u16,
     pub sender_dry_length: u32,
-    pub sender_dry_assoc_id : sctp_assoc_t
+    pub sender_dry_assoc_id: sctp_assoc_t
 }
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct sctp_event_subscribe {
-    pub sctp_data_io_event : u8,
-    pub sctp_association_event : u8,
-    pub sctp_address_event : u8,
-    pub sctp_send_failure_event : u8,
-    pub sctp_peer_error_event : u8,
-    pub sctp_shutdown_event : u8,
-    pub sctp_partial_delivery_event : u8,
-    pub sctp_adaptation_layer_event : u8,
-    pub sctp_authentication_event : u8,
-    pub sctp_sender_dry_event : u8
+    pub sctp_data_io_event: u8,
+    pub sctp_association_event: u8,
+    pub sctp_address_event: u8,
+    pub sctp_send_failure_event: u8,
+    pub sctp_peer_error_event: u8,
+    pub sctp_shutdown_event: u8,
+    pub sctp_partial_delivery_event: u8,
+    pub sctp_adaptation_layer_event: u8,
+    pub sctp_authentication_event: u8,
+    pub sctp_sender_dry_event: u8
 }
 
 #[repr(C)]
@@ -316,7 +316,7 @@ pub union sctp_notification {
 pub struct sctp_notification_header {
     pub sn_type: u16,
     pub sn_flags: u16,
-    pub sn_length : u32
+    pub sn_length: u32
 }
 
 #[repr(C)]
@@ -349,21 +349,21 @@ pub enum sctp_sn_error {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct sctp_rtoinfo {
-    pub srto_assoc_id : sctp_assoc_t,
+    pub srto_assoc_id: sctp_assoc_t,
     pub srto_initial: u32,
     pub srto_max: u32,
-    pub srto_min : u32
+    pub srto_min: u32
 }
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct sctp_assocparams {
-    pub sasoc_assoc_id : sctp_assoc_t,
+    pub sasoc_assoc_id: sctp_assoc_t,
     pub sasoc_asocmaxrxt: u16,
     pub sasoc_number_peer_destinations: u16,
     pub sasoc_peer_rwnd: u32,
     pub sasoc_local_rwnd: u32,
-    pub sasoc_cookie_life : u32
+    pub sasoc_cookie_life: u32
 }
 
 #[repr(C)]
@@ -381,7 +381,7 @@ pub struct sctp_setprim {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct sctp_setadaptation {
-    pub ssb_adaptation_ind : u32
+    pub ssb_adaptation_ind: u32
 }
 
 #[repr(C)]
@@ -414,7 +414,7 @@ pub struct sctp_paddrparams {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct sctp_authchunk {
-    pub sauth_chunk : u8
+    pub sauth_chunk: u8
 }
 
 pub const SCTP_AUTH_HMAC_ID_SHA1: u32 = 1;
@@ -424,7 +424,7 @@ pub const SCTP_AUTH_HMAC_ID_SHA256: u32 = 3;
 #[derive(Debug)]
 pub struct sctp_hmacalgo {
     pub shmac_number_of_idents: u32,
-    pub shmac_idents : __IncompleteArrayField<u16>
+    pub shmac_idents: __IncompleteArrayField<u16>
 }
 
 #[repr(C)]
@@ -454,8 +454,8 @@ pub struct sctp_sack_info {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct sctp_assoc_value {
-    pub assoc_id : sctp_assoc_t,
-    pub assoc_value : u32
+    pub assoc_id: sctp_assoc_t,
+    pub assoc_value: u32
 }
 
 #[repr(C)]
@@ -481,15 +481,15 @@ pub enum sctp_spinfo_state {
 
 #[repr(C)]
 pub struct sctp_status {
-    pub sstat_assoc_id : sctp_assoc_t,
-    pub sstat_state : i32,
+    pub sstat_assoc_id: sctp_assoc_t,
+    pub sstat_state: i32,
     pub sstat_rwnd: u32,
     pub sstat_unackdata: u16,
     pub sstat_penddata: u16,
     pub sstat_instrms: u16,
     pub sstat_outstrms: u16,
     pub sstat_fragmentation_point: u32,
-    pub sstat_primary : sctp_paddrinfo
+    pub sstat_primary: sctp_paddrinfo
 }
 
 #[repr(C)]
@@ -519,7 +519,7 @@ pub enum sctp_sstat_state {
 pub struct sctp_getaddrs_old {
     pub assoc_id : sctp_assoc_t,
     pub addr_num: libc::c_int,
-    pub addrs : *mut libc::sockaddr,
+    pub addrs: *mut libc::sockaddr,
 }
 
 #[repr(C)]
@@ -557,8 +557,8 @@ pub const MSG_NOTIFICATION: i32 = 0x8000;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct sctp_peeloff_arg_t {
-    pub associd : sctp_assoc_t,
-    pub sd : libc::c_int
+    pub associd: sctp_assoc_t,
+    pub sd: libc::c_int
 }
 
 extern "C" {
@@ -574,7 +574,7 @@ extern "C" {
         sd: libc::c_int,
         addrs: *const libc::sockaddr,
         addrcnt: libc::c_int,
-        id: * mut sctp_assoc_t
+        id: *mut sctp_assoc_t
     ) -> libc::c_int;
 
     pub fn sctp_peeloff(
@@ -587,7 +587,7 @@ extern "C" {
         id: sctp_assoc_t,
         opt: libc::c_int,
         arg: *mut libc::c_void,
-        size: * mut libc::socklen_t
+        size: *mut libc::socklen_t
     ) -> libc::c_int;
 
     pub fn sctp_getpaddrs(
@@ -633,12 +633,12 @@ extern "C" {
 
     pub fn sctp_recvmsg(
         sd: libc::c_int,
-        msg : *mut libc::c_void,
-        len : libc::size_t,
-        from : *mut libc::sockaddr,
-        fromlen : *mut libc::socklen_t,
-        sinfo : *mut sctp_sndrcvinfo,
-        msg_flags : *mut libc::c_int
+        msg: *mut libc::c_void,
+        len: libc::size_t,
+        from: *mut libc::sockaddr,
+        fromlen: *mut libc::socklen_t,
+        sinfo: *mut sctp_sndrcvinfo,
+        msg_flags: *mut libc::c_int
     ) -> libc::c_int;
 
     pub fn sctp_getaddrlen(family: libc::sa_family_t) -> libc::c_int;
