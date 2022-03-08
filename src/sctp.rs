@@ -133,8 +133,8 @@ impl SctpStream {
         self.0.shutdown()
     }
 
-    pub fn event_subsctibe(&self, event: Event) -> io::Result<()> {
-        self.0.event_subsctibe(event)
+    pub fn event_subscribe(&self, event: Event) -> io::Result<()> {
+        self.0.event_subscribe(event)
     }
 
     pub fn try_clone(&self) -> io::Result<SctpStream> {
