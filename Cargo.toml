@@ -1,21 +1,17 @@
 [package]
 name          = "sctp"
-version       = "0.1.7"
+version       = "0.2.0"
+edition       = "2024"
+rust-version  = "1.85"
 license       = "MIT"
-authors       = ["danc danc@main.run>"]
-description   = "sctp"
+authors       = ["danc <danc@main.run>"]
+description   = "Stream Control Transmission Protocol (SCTP) sockets"
 documentation = "https://docs.rs/sctp"
-homepage      = "https://github.com/mitum/sctp"
-repository    = "https://github.com/mitum/sctp"
-keywords       = ["sctp", "net"]
-exclude       = [
-  ".gitignore",
-  ".travis.yml",
-  "deploy.sh",
-  "test/**/*",
-]
-
-build         = "build.rs"
+repository    = "https://github.com/danclive/sctp"
+keywords      = ["sctp", "net", "socket", "network"]
+categories    = ["network-programming"]
+exclude       = ["/.github", "/target"]
+readme        = "README.md"
 
 [dependencies]
 libc = "0.2"
